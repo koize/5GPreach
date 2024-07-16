@@ -1,0 +1,5 @@
+serial
+opencv-python
+requests
+imutils
+paramiko
