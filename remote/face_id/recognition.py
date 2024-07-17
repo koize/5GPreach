@@ -39,7 +39,8 @@ def main():
     
     # Initialise capturing video from the default camera
     # 0 for default camera, 1 if you have installed third-party webcam apps
-    cap = VideoStream(0).start()
+    #cap = VideoStream(0).start()
+    cap = VideoStream('rtsp://100.107.9.202:8080/').start()
 
     # Initialize variables to keep track of frame count, predictions, and frame skipping
     frame_index = 0

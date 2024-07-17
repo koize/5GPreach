@@ -1,10 +1,10 @@
 import serial
 import time
 # Configure the serial connection, chnage the COM port accordingly
-ser = serial.Serial('COM16', 115200, timeout=1)
+ser = serial.Serial('COM21', 115200, timeout=1)
 # Wait for the device to initialize
 time.sleep(2)
-# Send an AT command and wait for a response
+# Send an AT command and wait for a responsepip
 def send_at_command(command):
     ser.write((command + '\r\n').encode())
     response = b''
