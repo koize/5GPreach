@@ -10,7 +10,7 @@ from imutils.video import VideoStream
 opts = Options()
     
 #Put your name
-name = "bob"
+name = "j"
 
 # Define function to register a face !!!
 def register_face(img_path, user_id):
@@ -44,8 +44,8 @@ def main():
 
     # Initialise capturing video from the default camera
     # 0 for default camera, 1 if you have installed third-party webcam apps
-    #cap = VideoStream(0).start()
-    cap = VideoStream('rtsp://100.107.9.202:8080/').start()
+    cap = VideoStream(0).start()
+    #cap = VideoStream('rtsp://100.107.9.202:8080/').start()
 
     # Initialize variables to keep track of frame count, predictions, and frame skipping
     frame_index = 0
