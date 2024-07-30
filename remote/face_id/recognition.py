@@ -22,6 +22,8 @@ MQTT_RECEIVE = "home/server"
 frame = np.zeros((240, 320, 3), np.uint8)
 
 
+
+
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code "+str(rc))
@@ -41,7 +43,16 @@ def on_message(client, userdata, msg):
     # Decode to Original Frame
     frame = cv2.imdecode(npimg, 1)
 
+    
 
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect(MQTT_BROKER)
+
+# Starting thread which will receive the frames
+client.loop_start()
 
 
 # Define function to register a face !!!
