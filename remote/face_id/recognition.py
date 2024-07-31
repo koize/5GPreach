@@ -1,13 +1,63 @@
 # Import necessary modules and packages
 import os
 import cv2
+import numpy as np
 import requests
 import datetime
+import time
 from options import Options
 from imutils.video import VideoStream
+import paho.mqtt.client as mqtt
+import base64
+import send_cmd as send
+import paramiko
 
 # Create an instance of the Options class
 opts = Options()
+
+raspberry_pi_ip = "100.110.25.68"
+username = "pi"
+password = "raspberry"
+# Establish SSH connection
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(raspberry_pi_ip, username=username, password=password)
+
+# MQTT
+MQTT_BROKER = "100.110.25.68"
+MQTT_RECEIVE = "home/server"
+
+
+# The callback for when the client receives a CONNACK response from the server.
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+
+    # Subscribing in on_connect() means that if we lose the connection and
+    # reconnect then subscriptions will be renewed.
+    client.subscribe(MQTT_RECEIVE)
+
+frame = np.zeros((240, 320, 3), np.uint8)
+
+# The callback for when a PUBLISH message is received from the server.
+def on_message(client, userdata, msg):
+    global frame
+    # Decoding the message
+    img = base64.b64decode(msg.payload)
+    # converting into numpy array from buffer
+    npimg = np.frombuffer(img, dtype=np.uint8)
+    # Decode to Original Frame
+    frame = cv2.imdecode(npimg, 1)
+
+
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+
+client.connect(MQTT_BROKER)
+
+# Starting thread which will receive the frames
+client.loop_start()
+
 
 # Define function to recognize a face !!!
 def recognize_face(img_path):
@@ -33,6 +83,7 @@ def recognize_face(img_path):
 
 # Define the main function
 def main():
+    global frame
     # Captures the video frames from the camera,
     # detects the faces in the frames,
     # and sends them to the server for recognition. !!!
@@ -40,12 +91,15 @@ def main():
     # Initialise capturing video from the default camera
     # 0 for default camera, 1 if you have installed third-party webcam apps
     #cap = VideoStream(0).start()
-    cap = VideoStream('rtsp://100.107.9.202:8080/').start()
+    #cap = VideoStream('rtsp://100.107.9.202:8080/').start()
+    #cap = VideoStream(src=0).start()
 
     # Initialize variables to keep track of frame count, predictions, and frame skipping
     frame_index = 0
     predictions = {}
     skip_frame = 5
+    send.turn_led_off(ssh)
+
 
     # Begin the main loop to process frames from the camera
     while True:
@@ -56,7 +110,7 @@ def main():
             break
 
         # Capture a frame from the camera
-        frame = cap.read()
+        #frame = cap.read()
         if frame is None:
             print("Camera closed")
             break
@@ -115,16 +169,22 @@ def main():
                             print(f'Recognized as: {user["userid"]}')
                             # Add name right next to the rectangle
                             cv2.putText(frame, recognized_ID, (predictions[i]['x_min'], predictions[i]['y_min']-10), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                            send.turn_led_on(ssh)
                         else:
                             print("No face(s) recognized!!!")
+                            send.turn_led_off(ssh)
         else:
             print('Make sure you are showing your face ONLY and CLEARLY...')
+            send.turn_led_off(ssh)
 
         cv2.imshow('Image Viewer', frame)
 
     # Release the camera and close all windows
-    cap.stop()
+    #cap.stop()
     cv2.destroyAllWindows()
+    client.loop_stop()
+    time.sleep(5)
+    send.turn_led_off(ssh)
 
 
 # Call the main function if this script is being run directly

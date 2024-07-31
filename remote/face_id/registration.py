@@ -15,10 +15,9 @@ opts = Options()
 #Put your name
 name = "j"
 
-MQTT_BROKER = "IP Address of the Broker"
+MQTT_BROKER = "100.110.25.68"
 MQTT_RECEIVE = "home/server"
 
-frame = np.zeros((240, 320, 3), np.uint8)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -28,6 +27,7 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe(MQTT_RECEIVE)
 
+frame = np.zeros((240, 320, 3), np.uint8)
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
@@ -73,6 +73,8 @@ def register_face(img_path, user_id):
 
 # Define the main function
 def main():
+
+    global frame
     # Captures the video frames from the camera,
     # detects the faces in the frames,
     # and sends them to the server with user ids for registration. !!!
@@ -84,7 +86,6 @@ def main():
     # 0 for default camera, 1 if you have installed third-party webcam apps
     #cap = VideoStream(0).start()
     #cap = VideoStream('rtsp://100.107.9.202:8080/').start()
-    cap = VideoStream("Stream", frame).start()
 
     # Initialize variables to keep track of frame count, predictions, and frame skipping
     frame_index = 0
@@ -99,7 +100,6 @@ def main():
             break
 
          # Capture a frame from the camera
-        frame = cap.read()
         if frame is None:
             print("Camera closed")
             break
@@ -156,7 +156,6 @@ def main():
         cv2.imshow('Image Viewer', frame)
 
     # Release the camera and close all windows
-    cap.stop()
     cv2.destroyAllWindows()
     client.loop_stop()
 
