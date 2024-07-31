@@ -1,59 +1,16 @@
 # Import necessary modules and packages
 import os
 import cv2
-import numpy as np
 import requests
 import datetime
 from options import Options
 from imutils.video import VideoStream
-import paho.mqtt.client as mqtt
-import base64
-
 
 # Create an instance of the Options class
 opts = Options()
     
 #Put your name
 name = "kel"
-
-MQTT_BROKER = "IP Address of the Broker"
-MQTT_RECEIVE = "home/server"
-
-frame = np.zeros((240, 320, 3), np.uint8)
-
-
-
-
-# The callback for when the client receives a CONNACK response from the server.
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
-
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    client.subscribe(MQTT_RECEIVE)
-
-
-# The callback for when a PUBLISH message is received from the server.
-def on_message(client, userdata, msg):
-    global frame
-    # Decoding the message
-    img = base64.b64decode(msg.payload)
-    # converting into numpy array from buffer
-    npimg = np.frombuffer(img, dtype=np.uint8)
-    # Decode to Original Frame
-    frame = cv2.imdecode(npimg, 1)
-
-    
-
-client = mqtt.Client()
-client.on_connect = on_connect
-client.on_message = on_message
-
-client.connect(MQTT_BROKER)
-
-# Starting thread which will receive the frames
-client.loop_start()
-
 
 # Define function to register a face !!!
 def register_face(img_path, user_id):
@@ -87,8 +44,8 @@ def main():
 
     # Initialise capturing video from the default camera
     # 0 for default camera, 1 if you have installed third-party webcam apps
-    #cap = VideoStream(0).start()
-    cap = VideoStream("Stream", frame).start()
+    cap = VideoStream(0).start()
+    #cap = VideoStream('rtsp://100.107.9.202:8080/').start()
 
     # Initialize variables to keep track of frame count, predictions, and frame skipping
     frame_index = 0
@@ -162,8 +119,6 @@ def main():
     # Release the camera and close all windows
     cap.stop()
     cv2.destroyAllWindows()
-    client.loop_stop()
-
     
 # Call the main function if this script is being run directly
 if __name__ == "__main__":
