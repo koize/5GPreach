@@ -3,7 +3,7 @@ import cv2 as cv
 import numpy as np
 import paho.mqtt.client as mqtt
 
-MQTT_BROKER = "100.110.25.68"
+MQTT_BROKER = "100.70.118.250"
 MQTT_RECEIVE = "home/server"
 
 frame = np.zeros((240, 320, 3), np.uint8)

@@ -15,7 +15,7 @@ import paramiko
 # Create an instance of the Options class
 opts = Options()
 
-raspberry_pi_ip = "100.110.25.68"
+raspberry_pi_ip = "100.70.118.250"
 username = "pi"
 password = "raspberry"
 # Establish SSH connection
@@ -24,7 +24,7 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect(raspberry_pi_ip, username=username, password=password)
 
 # MQTT
-MQTT_BROKER = "100.110.25.68"
+MQTT_BROKER = "100.70.118.250"
 MQTT_RECEIVE = "home/server"
 
 
